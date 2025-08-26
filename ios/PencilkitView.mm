@@ -115,6 +115,37 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   [_view setDrawing:transformedDrawing];
 }
 
+- (void)requestDataUri
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    PKDrawing *currentDrawing = [_view drawing];
+    UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:1.0];
+    
+    if (image) {
+      NSData *imageData = UIImagePNGRepresentation(image);
+      if (imageData) {
+        NSString *base64String = [imageData base64EncodedStringWithOptions:0];
+        NSString *dataUri = [NSString stringWithFormat:@"data:image/png;base64,%@", base64String];
+        
+        PencilkitViewEventEmitter::OnExportCompleted event;
+        event.success = true;
+        event.uri = std::string([dataUri UTF8String]);
+        eventEmitter->onExportCompleted(event);
+      } else {
+        PencilkitViewEventEmitter::OnExportCompleted event;
+        event.success = false;
+        event.error = std::string("Failed to convert image to PNG data");
+        eventEmitter->onExportCompleted(event);
+      }
+    } else {
+      PencilkitViewEventEmitter::OnExportCompleted event;
+      event.success = false;
+      event.error = std::string("Failed to generate image from drawing");
+      eventEmitter->onExportCompleted(event);
+    }
+  }
+}
+
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

@@ -34,10 +34,17 @@ interface ZoomEvent {
   zoomScale: Double;
 }
 
+interface ExportResult {
+  success: boolean;
+  uri?: string;
+  error?: string;
+}
+
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
+  onExportCompleted?: DirectEventHandler<ExportResult>;
 }
 
 /** 6-element [a,b,c,d,tx,ty] */
@@ -53,10 +60,18 @@ interface Commands {
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
     visible: boolean
   ) => void;
+  requestDataUri: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>
+  ) => void;
 }
 
 export const Commands = codegenNativeCommands<Commands>({
-  supportedCommands: ['setToolPickerVisible', 'clear', 'transformDrawing'],
+  supportedCommands: [
+    'setToolPickerVisible',
+    'clear',
+    'transformDrawing',
+    'requestDataUri',
+  ],
 });
 
 export default codegenNativeComponent<NativeProps>('PencilkitView');

@@ -1,10 +1,11 @@
-import { useRef, type ComponentRef } from 'react';
+import { useRef, useState, type ComponentRef } from 'react';
 import { View, StyleSheet, Button, Image } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PencilkitView, Commands } from 'react-native-pencilkit';
 
 export default function App() {
   const ref = useRef<ComponentRef<typeof PencilkitView>>(null);
+  const [exportedImage, setExportedImage] = useState<string | null>(null);
 
   return (
     <SafeAreaProvider>
@@ -44,6 +45,12 @@ export default function App() {
               );
             }}
           />
+          <Button
+            title="Export"
+            onPress={() => {
+              Commands.requestDataUri(ref.current!);
+            }}
+          />
         </View>
         <PencilkitView
           ref={ref}
@@ -54,8 +61,32 @@ export default function App() {
           onScroll={(e) => {
             console.log('Scroll event', e.nativeEvent);
           }}
+          onExportCompleted={(e) => {
+            const result = e.nativeEvent;
+            if (result.success) {
+              console.log('Export successful:', result.uri);
+              setExportedImage(result.uri);
+            } else {
+              console.error('Export failed:', result.reason);
+            }
+          }}
           drawingPolicy="anyInput"
         />
+        {exportedImage && (
+          <Image
+            source={{ uri: exportedImage }}
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              right: 20,
+              width: 100,
+              height: 100,
+              borderWidth: 2,
+              borderColor: 'white',
+            }}
+            resizeMode="contain"
+          />
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );

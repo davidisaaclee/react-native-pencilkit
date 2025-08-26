@@ -6,6 +6,7 @@ import { PencilkitView, Commands } from 'react-native-pencilkit';
 export default function App() {
   const ref = useRef<ComponentRef<typeof PencilkitView>>(null);
   const [exportedImage, setExportedImage] = useState<string | null>(null);
+  const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
 
   return (
     <SafeAreaProvider>
@@ -46,9 +47,25 @@ export default function App() {
             }}
           />
           <Button
-            title="Export"
+            title="Export Image"
             onPress={() => {
               Commands.requestDataUri(ref.current!);
+            }}
+          />
+          <Button
+            title="Save Drawing"
+            onPress={() => {
+              Commands.requestDrawingData(ref.current!);
+            }}
+          />
+          <Button
+            title="Load Drawing"
+            disabled={!savedDrawingData}
+            onPress={() => {
+              if (savedDrawingData) {
+                Commands.loadDrawingData(ref.current!, savedDrawingData);
+                setExportedImage(null);
+              }
             }}
           />
         </View>
@@ -67,7 +84,16 @@ export default function App() {
               console.log('Export successful:', result.uri);
               setExportedImage(result.uri);
             } else {
-              console.error('Export failed:', result.reason);
+              console.error('Export failed:', result.error);
+            }
+          }}
+          onDrawingData={(e) => {
+            const result = e.nativeEvent;
+            if (result.success) {
+              console.log('Drawing data saved');
+              setSavedDrawingData(result.data!);
+            } else {
+              console.error('Drawing data export failed:', result.error);
             }
           }}
           drawingPolicy="anyInput"

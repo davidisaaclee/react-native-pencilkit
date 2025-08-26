@@ -69,6 +69,7 @@ using namespace facebook::react;
   [super updateProps:props oldProps:oldProps];
 }
 
+
 - (PKCanvasViewDrawingPolicy)drawingPolicyFrom:(PencilkitViewDrawingPolicy)policy
 {
   if (policy == facebook::react::PencilkitViewDrawingPolicy::AnyInput) {
@@ -142,6 +143,41 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
       event.success = false;
       event.error = std::string("Failed to generate image from drawing");
       eventEmitter->onExportCompleted(event);
+    }
+  }
+}
+
+- (void)requestDrawingData
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    PKDrawing *currentDrawing = [_view drawing];
+    NSData *drawingData = [currentDrawing dataRepresentation];
+    
+    if (drawingData) {
+      NSString *base64String = [drawingData base64EncodedStringWithOptions:0];
+      
+      PencilkitViewEventEmitter::OnDrawingData event;
+      event.success = true;
+      event.data = std::string([base64String UTF8String]);
+      eventEmitter->onDrawingData(event);
+    } else {
+      PencilkitViewEventEmitter::OnDrawingData event;
+      event.success = false;
+      event.error = std::string("Failed to get drawing data representation");
+      eventEmitter->onDrawingData(event);
+    }
+  }
+}
+
+- (void)loadDrawingData:(NSString *)base64String
+{
+  NSData *drawingData = [[NSData alloc] initWithBase64EncodedString:base64String options:0];
+  
+  if (drawingData) {
+    NSError *error = nil;
+    PKDrawing *drawing = [[PKDrawing alloc] initWithData:drawingData error:&error];
+    if (drawing && !error) {
+      [_view setDrawing:drawing];
     }
   }
 }

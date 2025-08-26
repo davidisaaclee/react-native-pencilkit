@@ -40,11 +40,18 @@ interface ExportResult {
   error?: string;
 }
 
+interface DrawingDataResult {
+  success: boolean;
+  data?: string;
+  error?: string;
+}
+
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
   onExportCompleted?: DirectEventHandler<ExportResult>;
+  onDrawingData?: DirectEventHandler<DrawingDataResult>;
 }
 
 /** 6-element [a,b,c,d,tx,ty] */
@@ -63,6 +70,13 @@ interface Commands {
   requestDataUri: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>
   ) => void;
+  requestDrawingData: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>
+  ) => void;
+  loadDrawingData: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    base64Data: string
+  ) => void;
 }
 
 export const Commands = codegenNativeCommands<Commands>({
@@ -71,6 +85,8 @@ export const Commands = codegenNativeCommands<Commands>({
     'clear',
     'transformDrawing',
     'requestDataUri',
+    'requestDrawingData',
+    'loadDrawingData',
   ],
 });
 

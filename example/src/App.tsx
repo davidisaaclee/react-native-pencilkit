@@ -78,7 +78,7 @@ export default function App() {
           onScroll={(e) => {
             console.log('Scroll event', e.nativeEvent);
           }}
-          onExportCompleted={(e) => {
+          onDataUri={(e) => {
             const result = e.nativeEvent;
             if (result.success) {
               console.log('Export successful:', result.uri);

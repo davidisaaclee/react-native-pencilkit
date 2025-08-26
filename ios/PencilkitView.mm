@@ -128,21 +128,21 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
         NSString *base64String = [imageData base64EncodedStringWithOptions:0];
         NSString *dataUri = [NSString stringWithFormat:@"data:image/png;base64,%@", base64String];
         
-        PencilkitViewEventEmitter::OnExportCompleted event;
+        PencilkitViewEventEmitter::OnDataUri event;
         event.success = true;
         event.uri = std::string([dataUri UTF8String]);
-        eventEmitter->onExportCompleted(event);
+        eventEmitter->onDataUri(event);
       } else {
-        PencilkitViewEventEmitter::OnExportCompleted event;
+        PencilkitViewEventEmitter::OnDataUri event;
         event.success = false;
         event.error = std::string("Failed to convert image to PNG data");
-        eventEmitter->onExportCompleted(event);
+        eventEmitter->onDataUri(event);
       }
     } else {
-      PencilkitViewEventEmitter::OnExportCompleted event;
+      PencilkitViewEventEmitter::OnDataUri event;
       event.success = false;
       event.error = std::string("Failed to generate image from drawing");
-      eventEmitter->onExportCompleted(event);
+      eventEmitter->onDataUri(event);
     }
   }
 }

@@ -50,7 +50,7 @@ interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
-  onExportCompleted?: DirectEventHandler<ExportResult>;
+  onDataUri?: DirectEventHandler<ExportResult>;
   onDrawingData?: DirectEventHandler<DrawingDataResult>;
 }
 

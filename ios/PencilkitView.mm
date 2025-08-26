@@ -14,7 +14,8 @@ using namespace facebook::react;
 @end
 
 @implementation PencilkitView {
-    UIView * _view;
+  PKCanvasView* _Nonnull _view;
+  PKTool* _tool;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -28,7 +29,14 @@ using namespace facebook::react;
     static const auto defaultProps = std::make_shared<const PencilkitViewProps>();
     _props = defaultProps;
 
-    _view = [[UIView alloc] init];
+    _view = [[PKCanvasView alloc] initWithFrame:frame];
+    [_view setMaximumZoomScale:5];
+    [_view setMinimumZoomScale:0.1];
+
+    [_view setDrawingPolicy:PKCanvasViewDrawingPolicyAnyInput];
+    _tool = [[PKInkingTool alloc] initWithInkType:PKInkTypePen color:[UIColor redColor] width:10.f];
+    [_view setTool:_tool];
+    [_view becomeFirstResponder];
 
     self.contentView = _view;
   }

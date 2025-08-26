@@ -1,5 +1,6 @@
 #import <React/RCTViewComponentView.h>
 #import <UIKit/UIKit.h>
+#import <PencilKit/PencilKit.h>
 
 #ifndef PencilkitViewNativeComponent_h
 #define PencilkitViewNativeComponent_h

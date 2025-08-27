@@ -1,10 +1,10 @@
 import { useRef, useState, type ComponentRef } from 'react';
 import { View, StyleSheet, Button, Image } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PencilkitView, Commands } from 'react-native-pencilkit';
+import { PencilkitCanvas } from 'react-native-pencilkit';
 
 export default function App() {
-  const ref = useRef<ComponentRef<typeof PencilkitView>>(null);
+  const ref = useRef<ComponentRef<typeof PencilkitCanvas>>(null);
   const [exportedImage, setExportedImage] = useState<string | null>(null);
   const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
 
@@ -21,41 +21,56 @@ export default function App() {
           <Button
             title="Clear"
             onPress={() => {
-              Commands.clear(ref.current!);
+              ref.current?.clear();
             }}
           />
           <Button
             title="Focus"
             onPress={() => {
-              Commands.setToolPickerVisible(ref.current!, true);
+              ref.current?.setToolPickerVisible(true);
             }}
           />
           <Button
             title="Blur"
             onPress={() => {
-              Commands.setToolPickerVisible(ref.current!, false);
+              ref.current?.setToolPickerVisible(false);
             }}
           />
           <Button
             title="Rotate"
             onPress={() => {
               // rotate by 45 degrees
-              Commands.transformDrawing(
-                ref.current!,
-                [0.707, 0.707, -0.707, 0.707, 0, 0]
-              );
+              ref.current?.transformDrawing([
+                0.707, 0.707, -0.707, 0.707, 0, 0,
+              ]);
             }}
           />
           <Button
             title="Export Image"
-            onPress={() => {
-              Commands.requestDataUri(ref.current!);
+            onPress={async () => {
+              try {
+                const uri = await ref.current?.requestDataUri();
+                if (uri) {
+                  console.log('Export successful:', uri);
+                  setExportedImage(uri);
+                }
+              } catch (error) {
+                console.error('Export failed:', error);
+              }
             }}
           />
           <Button
             title="Save Drawing"
-            onPress={() => {
-              Commands.requestDrawingData(ref.current!);
+            onPress={async () => {
+              try {
+                const data = await ref.current?.requestDrawingData();
+                if (data) {
+                  console.log('Drawing data saved');
+                  setSavedDrawingData(data);
+                }
+              } catch (error) {
+                console.error('Drawing data export failed:', error);
+              }
             }}
           />
           <Button
@@ -63,38 +78,20 @@ export default function App() {
             disabled={!savedDrawingData}
             onPress={() => {
               if (savedDrawingData) {
-                Commands.loadDrawingData(ref.current!, savedDrawingData);
+                ref.current?.loadDrawingData(savedDrawingData);
                 setExportedImage(null);
               }
             }}
           />
         </View>
-        <PencilkitView
+        <PencilkitCanvas
           ref={ref}
           style={{ flex: 1, margin: 20 }}
           onZoom={(e) => {
-            console.log('Zoom event', e.nativeEvent);
+            console.log('Zoom event', e);
           }}
           onScroll={(e) => {
-            console.log('Scroll event', e.nativeEvent);
-          }}
-          onDataUri={(e) => {
-            const result = e.nativeEvent;
-            if (result.success) {
-              console.log('Export successful:', result.uri);
-              setExportedImage(result.uri);
-            } else {
-              console.error('Export failed:', result.error);
-            }
-          }}
-          onDrawingData={(e) => {
-            const result = e.nativeEvent;
-            if (result.success) {
-              console.log('Drawing data saved');
-              setSavedDrawingData(result.data!);
-            } else {
-              console.error('Drawing data export failed:', result.error);
-            }
+            console.log('Scroll event', e);
           }}
           drawingPolicy="anyInput"
         />

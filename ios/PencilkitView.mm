@@ -32,6 +32,7 @@ using namespace facebook::react;
     _view = [[PKCanvasView alloc] initWithFrame:frame];
     _view.opaque = NO;
     [_view setMaximumZoomScale:5];
+    [_view setBouncesZoom:NO];
     /* [_view setMinimumZoomScale:0.1]; */
     /* [_view setDrawingPolicy:PKCanvasViewDrawingPolicyAnyInput]; */
 

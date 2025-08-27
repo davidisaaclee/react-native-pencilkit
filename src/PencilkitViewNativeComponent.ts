@@ -37,6 +37,12 @@ interface ZoomEvent {
 interface ExportResult {
   success: boolean;
   uri?: string;
+  frame?: {
+    x: Double;
+    y: Double;
+    width: Double;
+    height: Double;
+  };
   error?: string;
 }
 

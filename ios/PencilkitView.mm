@@ -31,14 +31,14 @@ using namespace facebook::react;
 
     _view = [[PKCanvasView alloc] initWithFrame:frame];
     _view.opaque = NO;
-    [_view setMaximumZoomScale:5]; 
+    [_view setMaximumZoomScale:5];
     /* [_view setMinimumZoomScale:0.1]; */
     /* [_view setDrawingPolicy:PKCanvasViewDrawingPolicyAnyInput]; */
 
     _toolPicker = [[PKToolPicker alloc] init];
     [_toolPicker addObserver:_view];
     [_toolPicker setVisible:YES forFirstResponder:_view];
-    
+
     _view.delegate = self;
 
     self.contentView = _view;
@@ -60,12 +60,12 @@ using namespace facebook::react;
 {
   const auto &oldViewProps = *std::static_pointer_cast<PencilkitViewProps const>(_props);
   const auto &newViewProps = *std::static_pointer_cast<PencilkitViewProps const>(props);
-  
+
   if (oldViewProps.drawingPolicy != newViewProps.drawingPolicy) {
     PKCanvasViewDrawingPolicy drawingPolicy = [self drawingPolicyFrom: newViewProps.drawingPolicy];
     [_view setDrawingPolicy:drawingPolicy];
   }
-  
+
   [super updateProps:props oldProps:oldProps];
 }
 
@@ -87,7 +87,7 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   return PencilkitView.class;
 }
 
-- (void)clear { 
+- (void)clear {
   [_view setDrawing:[[PKDrawing alloc] init]];
 }
 
@@ -103,14 +103,14 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
 - (void)transformDrawing:(const NSArray *)transform
 {
   CGAffineTransform affineTransform = CGAffineTransformMake(
-    [transform[0] doubleValue], 
-    [transform[1] doubleValue], 
-    [transform[2] doubleValue], 
-    [transform[3] doubleValue], 
-    [transform[4] doubleValue], 
+    [transform[0] doubleValue],
+    [transform[1] doubleValue],
+    [transform[2] doubleValue],
+    [transform[3] doubleValue],
+    [transform[4] doubleValue],
     [transform[5] doubleValue]
   );
-  
+
   PKDrawing *currentDrawing = [_view drawing];
   PKDrawing *transformedDrawing = [currentDrawing drawingByApplyingTransform:affineTransform];
   [_view setDrawing:transformedDrawing];
@@ -121,16 +121,22 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     PKDrawing *currentDrawing = [_view drawing];
     UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:1.0];
-    
+
     if (image) {
       NSData *imageData = UIImagePNGRepresentation(image);
       if (imageData) {
         NSString *base64String = [imageData base64EncodedStringWithOptions:0];
         NSString *dataUri = [NSString stringWithFormat:@"data:image/png;base64,%@", base64String];
-        
+
         PencilkitViewEventEmitter::OnDataUri event;
         event.success = true;
         event.uri = std::string([dataUri UTF8String]);
+        event.frame = facebook::react::PencilkitViewEventEmitter::OnDataUriFrame{
+          .x = currentDrawing.bounds.origin.x,
+          .y = currentDrawing.bounds.origin.y,
+          .width = currentDrawing.bounds.size.width,
+          .height = currentDrawing.bounds.size.height
+        };
         eventEmitter->onDataUri(event);
       } else {
         PencilkitViewEventEmitter::OnDataUri event;
@@ -152,10 +158,10 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     PKDrawing *currentDrawing = [_view drawing];
     NSData *drawingData = [currentDrawing dataRepresentation];
-    
+
     if (drawingData) {
       NSString *base64String = [drawingData base64EncodedStringWithOptions:0];
-      
+
       PencilkitViewEventEmitter::OnDrawingData event;
       event.success = true;
       event.data = std::string([base64String UTF8String]);
@@ -172,7 +178,7 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
 - (void)loadDrawingData:(NSString *)base64String
 {
   NSData *drawingData = [[NSData alloc] initWithBase64EncodedString:base64String options:0];
-  
+
   if (drawingData) {
     NSError *error = nil;
     PKDrawing *drawing = [[PKDrawing alloc] initWithData:drawingData error:&error];

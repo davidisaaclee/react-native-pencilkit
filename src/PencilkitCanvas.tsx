@@ -32,12 +32,21 @@ export interface PencilkitCanvasMethods {
   clear: () => void;
   setToolPickerVisible: (visible: boolean) => void;
   transformDrawing: (transform: Readonly<Matrix2D>) => void;
-  requestDataUri: () => Promise<string>;
+  requestDataUri: () => Promise<{
+    uri: string;
+    frame: { origin: [number, number]; size: [number, number] };
+  }>;
   requestDrawingData: () => Promise<string>;
   loadDrawingData: (base64Data: string) => void;
 }
 
-type CompletionHandler = {
+type DataUriCompletionHandler = {
+  resolve: (value: { uri: string; frame: { origin: [number, number]; size: [number, number] } }) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+};
+
+type DrawingDataCompletionHandler = {
   resolve: (value: string) => void;
   reject: (error: Error) => void;
   timeout: NodeJS.Timeout;
@@ -48,8 +57,8 @@ export const PencilkitCanvas = forwardRef<
   PencilkitCanvasProps
 >((props, forwardedRef) => {
   const nativeRef = useRef<ComponentRef<typeof NativePencilkitView>>(null);
-  const dataUriCompletionRef = useRef<CompletionHandler | null>(null);
-  const drawingDataCompletionRef = useRef<CompletionHandler | null>(null);
+  const dataUriCompletionRef = useRef<DataUriCompletionHandler | null>(null);
+  const drawingDataCompletionRef = useRef<DrawingDataCompletionHandler | null>(null);
 
   const handleDataUri = (e: any) => {
     const completion = dataUriCompletionRef.current;
@@ -60,7 +69,13 @@ export const PencilkitCanvas = forwardRef<
 
     const result = e.nativeEvent;
     if (result.success) {
-      completion.resolve(result.uri);
+      completion.resolve({
+        uri: result.uri,
+        frame: {
+          origin: [result.frame.x, result.frame.y],
+          size: [result.frame.width, result.frame.height]
+        }
+      });
     } else {
       completion.reject(new Error(result.error || 'Unknown error'));
     }

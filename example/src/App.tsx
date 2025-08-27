@@ -49,10 +49,11 @@ export default function App() {
             title="Export Image"
             onPress={async () => {
               try {
-                const uri = await ref.current?.requestDataUri();
-                if (uri) {
-                  console.log('Export successful:', uri);
-                  setExportedImage(uri);
+                const result = await ref.current?.requestDataUri();
+                if (result) {
+                  console.log('Export successful:', result.uri);
+                  console.log('Drawing frame:', result.frame);
+                  setExportedImage(result.uri);
                 }
               } catch (error) {
                 console.error('Export failed:', error);

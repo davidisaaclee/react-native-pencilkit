@@ -41,7 +41,10 @@ export interface PencilkitCanvasMethods {
 }
 
 type DataUriCompletionHandler = {
-  resolve: (value: { uri: string; frame: { origin: [number, number]; size: [number, number] } }) => void;
+  resolve: (value: {
+    uri: string;
+    frame: { origin: [number, number]; size: [number, number] };
+  }) => void;
   reject: (error: Error) => void;
   timeout: NodeJS.Timeout;
 };
@@ -58,7 +61,9 @@ export const PencilkitCanvas = forwardRef<
 >((props, forwardedRef) => {
   const nativeRef = useRef<ComponentRef<typeof NativePencilkitView>>(null);
   const dataUriCompletionRef = useRef<DataUriCompletionHandler | null>(null);
-  const drawingDataCompletionRef = useRef<DrawingDataCompletionHandler | null>(null);
+  const drawingDataCompletionRef = useRef<DrawingDataCompletionHandler | null>(
+    null
+  );
 
   const handleDataUri = (e: any) => {
     const completion = dataUriCompletionRef.current;
@@ -73,8 +78,8 @@ export const PencilkitCanvas = forwardRef<
         uri: result.uri,
         frame: {
           origin: [result.frame.x, result.frame.y],
-          size: [result.frame.width, result.frame.height]
-        }
+          size: [result.frame.width, result.frame.height],
+        },
       });
     } else {
       completion.reject(new Error(result.error || 'Unknown error'));

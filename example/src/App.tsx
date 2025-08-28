@@ -196,6 +196,12 @@ export default function App() {
                 });
               }}
             />
+            <Button
+              title="Get bounds"
+              onPress={async () => {
+                console.log('bounds', await ref.current?.getDrawingBounds());
+              }}
+            />
           </View>
         </ScrollView>
         {exportedImage && (

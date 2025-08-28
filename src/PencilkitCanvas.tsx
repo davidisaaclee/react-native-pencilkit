@@ -5,7 +5,9 @@ import {
   type ComponentRef,
 } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
+import { findNodeHandle } from 'react-native';
 import NativePencilkitView, { Commands } from './PencilkitViewNativeComponent';
+import Util from './NativePencilkitUtil';
 
 interface ScrollEvent {
   contentOffset: {
@@ -56,6 +58,10 @@ export interface PencilkitCanvasMethods {
     rect: { origin: [number, number]; size: [number, number] };
     animated?: boolean;
   }) => void;
+  getDrawingBounds(): Promise<{
+    origin: [number, number];
+    size: [number, number];
+  } | null>;
 }
 
 type DataUriCompletionHandler = {
@@ -191,6 +197,17 @@ export const PencilkitCanvas = forwardRef<
         opts.rect.size[1],
         opts.animated ?? false
       );
+    },
+
+    async getDrawingBounds() {
+      if (nativeRef.current == null) return null;
+      const handle = findNodeHandle(nativeRef.current);
+      if (handle == null) return null;
+      const bounds = await Util.getDrawingBounds(handle);
+      return {
+        origin: [bounds.x, bounds.y] as const,
+        size: [bounds.width, bounds.height] as const,
+      };
     },
   }));
 

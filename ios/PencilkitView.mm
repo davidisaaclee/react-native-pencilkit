@@ -255,6 +255,11 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   [_view zoomToRect:rect animated:animated];
 }
 
+- (CGRect)drawingBounds
+{
+  return [[_view drawing] bounds];
+}
+
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

@@ -83,6 +83,19 @@ interface Commands {
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
     base64Data: string
   ) => void;
+  setViewport: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    contentOffsetX: Double,
+    contentOffsetY: Double,
+    zoomScale: Double
+  ) => void;
+  zoomToRect: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    originX: Double,
+    originY: Double,
+    sizeWidth: Double,
+    sizeHeight: Double
+  ) => void;
 }
 
 export const Commands = codegenNativeCommands<Commands>({
@@ -93,6 +106,8 @@ export const Commands = codegenNativeCommands<Commands>({
     'requestDataUri',
     'requestDrawingData',
     'loadDrawingData',
+    'setViewport',
+    'zoomToRect',
   ],
 });
 

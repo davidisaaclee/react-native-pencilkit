@@ -12,6 +12,10 @@ interface ScrollEvent {
     x: number;
     y: number;
   };
+  /**
+   * NB: contentSize changes based on zoomScale (e.g. starting with a
+   * contentSize of (1,1), then setting zoomScale=2 results in contentSize of
+   * (2,2)) */
   contentSize: {
     width: number;
     height: number;
@@ -38,6 +42,13 @@ export interface PencilkitCanvasMethods {
   }>;
   requestDrawingData: () => Promise<string>;
   loadDrawingData: (base64Data: string) => void;
+  /** NB: Setting zoomScale by itself affects contentOffset, apparently zooming
+   * from the center of the viewport. */
+  setViewport: (opts: {
+    contentOffset?: { x: number; y: number };
+    zoomScale?: number;
+  }) => void;
+  zoomToRect: (rect: { origin: [number, number]; size: [number, number] }) => void;
 }
 
 type DataUriCompletionHandler = {
@@ -149,6 +160,26 @@ export const PencilkitCanvas = forwardRef<
     },
     loadDrawingData: (base64Data: string) => {
       Commands.loadDrawingData(nativeRef.current!, base64Data);
+    },
+    setViewport: (opts: {
+      contentOffset?: { x: number; y: number };
+      zoomScale?: number;
+    }) => {
+      Commands.setViewport(
+        nativeRef.current!,
+        opts.contentOffset?.x ?? NaN,
+        opts.contentOffset?.y ?? NaN,
+        opts.zoomScale ?? NaN
+      );
+    },
+    zoomToRect: (rect: { origin: [number, number]; size: [number, number] }) => {
+      Commands.zoomToRect(
+        nativeRef.current!,
+        rect.origin[0],
+        rect.origin[1],
+        rect.size[0],
+        rect.size[1]
+      );
     },
   }));
 

@@ -189,6 +189,47 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   }
 }
 
+- (void)setViewport:(double)contentOffsetX
+        contentOffsetY:(double)contentOffsetY
+             zoomScale:(double)zoomScale
+{
+  CGPoint currentContentOffset = _view.contentOffset;
+  CGFloat currentZoomScale = _view.zoomScale;
+  
+  // Update content offset if provided (not NaN)
+  CGPoint newContentOffset = currentContentOffset;
+  if (!isnan(contentOffsetX)) {
+    newContentOffset.x = contentOffsetX;
+  }
+  if (!isnan(contentOffsetY)) {
+    newContentOffset.y = contentOffsetY;
+  }
+  
+  // Update zoom scale if provided (not NaN)
+  CGFloat newZoomScale = currentZoomScale;
+  if (!isnan(zoomScale)) {
+    newZoomScale = zoomScale;
+  }
+  
+  // Apply the changes
+  if (!isnan(zoomScale)) {
+    [_view setZoomScale:newZoomScale animated:NO];
+  }
+  
+  if (!isnan(contentOffsetX) || !isnan(contentOffsetY)) {
+    [_view setContentOffset:newContentOffset animated:NO];
+  }
+}
+
+- (void)zoomToRect:(double)originX
+           originY:(double)originY
+         sizeWidth:(double)sizeWidth
+        sizeHeight:(double)sizeHeight
+{
+  CGRect rect = CGRectMake(originX, originY, sizeWidth, sizeHeight);
+  [_view zoomToRect:rect animated:NO];
+}
+
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

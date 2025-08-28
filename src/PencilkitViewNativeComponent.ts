@@ -54,6 +54,11 @@ interface DrawingDataResult {
 
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
+  drawingEnabled?: WithDefault<boolean, true>;
+  minimumZoomScale: Double;
+  maximumZoomScale: Double;
+  contentSizeWidth: Double;
+  contentSizeHeight: Double;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
   onDataUri?: DirectEventHandler<ExportResult>;

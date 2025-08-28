@@ -25,6 +25,10 @@ interface ScrollEvent {
 
 export interface PencilkitCanvasProps {
   drawingPolicy: 'default' | 'anyInput' | 'pencilOnly';
+  minimumZoomScale?: number;
+  maximumZoomScale?: number;
+  contentSize?: readonly [number, number];
+  drawingEnabled?: boolean;
   onScroll?: (event: ScrollEvent) => void;
   onZoom?: (event: ScrollEvent) => void;
   style?: StyleProp<ViewStyle>;
@@ -48,7 +52,7 @@ export interface PencilkitCanvasMethods {
     contentOffset?: { x: number; y: number };
     zoomScale?: number;
   }) => void;
-  zoomToRect: (opts: { 
+  zoomToRect: (opts: {
     rect: { origin: [number, number]; size: [number, number] };
     animated?: boolean;
   }) => void;
@@ -175,7 +179,7 @@ export const PencilkitCanvas = forwardRef<
         opts.zoomScale ?? NaN
       );
     },
-    zoomToRect: (opts: { 
+    zoomToRect: (opts: {
       rect: { origin: [number, number]; size: [number, number] };
       animated?: boolean;
     }) => {
@@ -195,6 +199,11 @@ export const PencilkitCanvas = forwardRef<
       ref={nativeRef}
       style={props.style}
       drawingPolicy={props.drawingPolicy}
+      drawingEnabled={props.drawingEnabled ?? true}
+      contentSizeWidth={props.contentSize?.[0] ?? NaN}
+      contentSizeHeight={props.contentSize?.[1] ?? NaN}
+      minimumZoomScale={props.minimumZoomScale ?? NaN}
+      maximumZoomScale={props.maximumZoomScale ?? NaN}
       onScroll={
         props.onScroll ? (e) => props.onScroll!(e.nativeEvent) : undefined
       }

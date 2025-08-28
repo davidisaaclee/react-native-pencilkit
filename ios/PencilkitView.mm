@@ -66,6 +66,30 @@ using namespace facebook::react;
     PKCanvasViewDrawingPolicy drawingPolicy = [self drawingPolicyFrom: newViewProps.drawingPolicy];
     [_view setDrawingPolicy:drawingPolicy];
   }
+  if (oldViewProps.drawingEnabled != newViewProps.drawingEnabled) {
+    if (@available(iOS 18.0, *)) {
+      [_view setDrawingEnabled:newViewProps.drawingEnabled];
+    } else {
+      [_view setUserInteractionEnabled:newViewProps.drawingEnabled];
+    }
+  }
+  if (!isnan(newViewProps.minimumZoomScale) && oldViewProps.minimumZoomScale != newViewProps.minimumZoomScale) {
+    [_view setMinimumZoomScale:newViewProps.minimumZoomScale];
+  }
+  if (!isnan(newViewProps.maximumZoomScale) && oldViewProps.maximumZoomScale != newViewProps.maximumZoomScale) {
+    [_view setMaximumZoomScale:newViewProps.maximumZoomScale];
+  }
+  
+  CGSize newContentSize = _view.contentSize;
+  if (!isnan(newViewProps.contentSizeWidth)) {
+    newContentSize.width = newViewProps.contentSizeWidth;
+  }
+  if (!isnan(newViewProps.contentSizeHeight)) {
+    newContentSize.height = newViewProps.contentSizeHeight;
+  }
+  if (oldViewProps.contentSizeWidth != newViewProps.contentSizeWidth || oldViewProps.contentSizeHeight != newViewProps.contentSizeHeight) {
+    [_view setContentSize:newContentSize];
+  }
 
   [super updateProps:props oldProps:oldProps];
 }

@@ -1,5 +1,5 @@
 import { useRef, useState, type ComponentRef } from 'react';
-import { View, StyleSheet, Button, Image } from 'react-native';
+import { View, StyleSheet, Button, Image, ScrollView } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PencilkitCanvas } from 'react-native-pencilkit';
 
@@ -7,6 +7,7 @@ export default function App() {
   const ref = useRef<ComponentRef<typeof PencilkitCanvas>>(null);
   const [exportedImage, setExportedImage] = useState<string | null>(null);
   const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
+  const [drawingEnabled, setDrawingEnabled] = useState(true);
 
   const canvasSize = useRef<[number, number] | null>(null);
 
@@ -19,136 +20,6 @@ export default function App() {
           resizeMode="cover"
         />
 
-        <View style={{ padding: 8 }}>
-          <Button
-            title="Clear"
-            onPress={() => {
-              ref.current?.clear();
-            }}
-          />
-          <Button
-            title="Focus"
-            onPress={() => {
-              ref.current?.setToolPickerVisible(true);
-            }}
-          />
-          <Button
-            title="Blur"
-            onPress={() => {
-              ref.current?.setToolPickerVisible(false);
-            }}
-          />
-          <Button
-            title="Rotate"
-            onPress={() => {
-              // rotate by 45 degrees
-              ref.current?.transformDrawing([
-                0.707, 0.707, -0.707, 0.707, 0, 0,
-              ]);
-            }}
-          />
-          <Button
-            title="Export Image"
-            onPress={async () => {
-              try {
-                const result = await ref.current?.requestDataUri();
-                if (result) {
-                  console.log('Export successful:', result.uri);
-                  console.log('Drawing frame:', result.frame);
-                  setExportedImage(result.uri);
-                }
-              } catch (error) {
-                console.error('Export failed:', error);
-              }
-            }}
-          />
-          <Button
-            title="Save Drawing"
-            onPress={async () => {
-              try {
-                const data = await ref.current?.requestDrawingData();
-                if (data) {
-                  console.log('Drawing data saved');
-                  setSavedDrawingData(data);
-                }
-              } catch (error) {
-                console.error('Drawing data export failed:', error);
-              }
-            }}
-          />
-          <Button
-            title="Load Drawing"
-            disabled={!savedDrawingData}
-            onPress={() => {
-              if (savedDrawingData) {
-                ref.current?.loadDrawingData(savedDrawingData);
-                setExportedImage(null);
-              }
-            }}
-          />
-          <Button
-            title="Set Viewport - Zoom 2x"
-            onPress={() => {
-              ref.current?.setViewport({
-                zoomScale: 2.0,
-              });
-            }}
-          />
-          <Button
-            title="Set Viewport - Center"
-            onPress={() => {
-              ref.current?.setViewport({
-                contentOffset: { x: 100, y: 100 },
-              });
-            }}
-          />
-          <Button
-            title="Set Viewport - Zoom & Center"
-            onPress={() => {
-              ref.current?.setViewport({
-                contentOffset: { x: 50, y: 50 },
-                zoomScale: 1.5,
-              });
-            }}
-          />
-          <Button
-            title="Reset Viewport"
-            onPress={() => {
-              ref.current?.setViewport({
-                contentOffset: { x: 0, y: 0 },
-                zoomScale: 1.0,
-              });
-            }}
-          />
-          <Button
-            title="Zoom to Small Rect"
-            onPress={() => {
-              console.log(
-                'zoom to small',
-                ref.current != null,
-                canvasSize.current
-              );
-              ref.current?.zoomToRect({
-                rect: {
-                  origin: [0, 0],
-                  size: canvasSize.current!.map((x) => x * 0.5),
-                },
-              });
-            }}
-          />
-          <Button
-            title="Zoom to Large Rect (Animated)"
-            onPress={() => {
-              ref.current?.zoomToRect({
-                rect: {
-                  origin: [0, 0],
-                  size: canvasSize.current!,
-                },
-                animated: true,
-              });
-            }}
-          />
-        </View>
         <View
           style={{ flex: 1, margin: 20 }}
           onLayout={(event) => {
@@ -159,6 +30,7 @@ export default function App() {
         >
           <PencilkitCanvas
             ref={ref}
+            drawingEnabled={drawingEnabled}
             style={{ flex: 1 }}
             onZoom={(e) => {
               console.log('Zoom event', e);
@@ -167,8 +39,165 @@ export default function App() {
               console.log('Scroll event', e);
             }}
             drawingPolicy="anyInput"
+            minimumZoomScale={0.5}
+            maximumZoomScale={5}
+            contentSize={[500, 500]}
           />
         </View>
+        <ScrollView
+          style={{
+            backgroundColor: 'hsla(0, 0%, 0%, 0.8)',
+            padding: 8,
+            position: 'absolute',
+            left: 0,
+            top: 40,
+            right: 0,
+            borderColor: 'white',
+            borderWidth: 1,
+          }}
+          horizontal
+        >
+          <Button
+            title={`Toggle Drawing (${drawingEnabled ? 'enabled' : 'disabled'})`}
+            onPress={() => setDrawingEnabled(!drawingEnabled)}
+          />
+          <Button
+            title="Clear"
+            onPress={() => {
+              ref.current?.clear();
+            }}
+          />
+          <View>
+            <Button
+              title="Focus"
+              onPress={() => {
+                ref.current?.setToolPickerVisible(true);
+              }}
+            />
+            <Button
+              title="Blur"
+              onPress={() => {
+                ref.current?.setToolPickerVisible(false);
+              }}
+            />
+          </View>
+          <Button
+            title="Rotate"
+            onPress={() => {
+              // rotate by 45 degrees
+              ref.current?.transformDrawing([
+                0.707, 0.707, -0.707, 0.707, 0, 0,
+              ]);
+            }}
+          />
+          <View>
+            <Button
+              title="Export Image"
+              onPress={async () => {
+                try {
+                  const result = await ref.current?.requestDataUri();
+                  if (result) {
+                    console.log('Export successful:', result.uri);
+                    console.log('Drawing frame:', result.frame);
+                    setExportedImage(result.uri);
+                  }
+                } catch (error) {
+                  console.error('Export failed:', error);
+                }
+              }}
+            />
+            <Button
+              title="Save Drawing"
+              onPress={async () => {
+                try {
+                  const data = await ref.current?.requestDrawingData();
+                  if (data) {
+                    console.log('Drawing data saved');
+                    setSavedDrawingData(data);
+                  }
+                } catch (error) {
+                  console.error('Drawing data export failed:', error);
+                }
+              }}
+            />
+            <Button
+              title="Load Drawing"
+              disabled={!savedDrawingData}
+              onPress={() => {
+                if (savedDrawingData) {
+                  ref.current?.loadDrawingData(savedDrawingData);
+                  setExportedImage(null);
+                }
+              }}
+            />
+          </View>
+          <View>
+            <Button
+              title="Set Viewport - Zoom 2x"
+              onPress={() => {
+                ref.current?.setViewport({
+                  zoomScale: 2.0,
+                });
+              }}
+            />
+            <Button
+              title="Set Viewport - Center"
+              onPress={() => {
+                ref.current?.setViewport({
+                  contentOffset: { x: 100, y: 100 },
+                });
+              }}
+            />
+            <Button
+              title="Set Viewport - Zoom & Center"
+              onPress={() => {
+                ref.current?.setViewport({
+                  contentOffset: { x: 50, y: 50 },
+                  zoomScale: 1.5,
+                });
+              }}
+            />
+            <Button
+              title="Reset Viewport"
+              onPress={() => {
+                ref.current?.setViewport({
+                  contentOffset: { x: 0, y: 0 },
+                  zoomScale: 1.0,
+                });
+              }}
+            />
+          </View>
+          <View>
+            <Button
+              title="Zoom to Small Rect"
+              onPress={() => {
+                console.log(
+                  'zoom to small',
+                  ref.current != null,
+                  canvasSize.current
+                );
+                ref.current?.zoomToRect({
+                  rect: {
+                    origin: [0, 0],
+                    size: canvasSize.current!.map((x) => x * 0.5),
+                  },
+                });
+              }}
+            />
+            <Button
+              title="Zoom to Large Rect (Animated)"
+              onPress={() => {
+                ref.current?.zoomToRect({
+                  rect: {
+                    origin: [0, 0],
+                    size: canvasSize.current!,
+                  },
+                  animated: true,
+                });
+              }}
+            />
+          </View>
+        </ScrollView>
         {exportedImage && (
           <Image
             source={{ uri: exportedImage }}

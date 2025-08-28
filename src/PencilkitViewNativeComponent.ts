@@ -94,7 +94,8 @@ interface Commands {
     originX: Double,
     originY: Double,
     sizeWidth: Double,
-    sizeHeight: Double
+    sizeHeight: Double,
+    animated: boolean
   ) => void;
 }
 

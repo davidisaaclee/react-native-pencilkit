@@ -225,9 +225,10 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
            originY:(double)originY
          sizeWidth:(double)sizeWidth
         sizeHeight:(double)sizeHeight
+          animated:(BOOL)animated
 {
   CGRect rect = CGRectMake(originX, originY, sizeWidth, sizeHeight);
-  [_view zoomToRect:rect animated:NO];
+  [_view zoomToRect:rect animated:animated];
 }
 
 #pragma mark - UIScrollViewDelegate

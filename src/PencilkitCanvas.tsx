@@ -48,7 +48,10 @@ export interface PencilkitCanvasMethods {
     contentOffset?: { x: number; y: number };
     zoomScale?: number;
   }) => void;
-  zoomToRect: (rect: { origin: [number, number]; size: [number, number] }) => void;
+  zoomToRect: (opts: { 
+    rect: { origin: [number, number]; size: [number, number] };
+    animated?: boolean;
+  }) => void;
 }
 
 type DataUriCompletionHandler = {
@@ -172,13 +175,17 @@ export const PencilkitCanvas = forwardRef<
         opts.zoomScale ?? NaN
       );
     },
-    zoomToRect: (rect: { origin: [number, number]; size: [number, number] }) => {
+    zoomToRect: (opts: { 
+      rect: { origin: [number, number]; size: [number, number] };
+      animated?: boolean;
+    }) => {
       Commands.zoomToRect(
         nativeRef.current!,
-        rect.origin[0],
-        rect.origin[1],
-        rect.size[0],
-        rect.size[1]
+        opts.rect.origin[0],
+        opts.rect.origin[1],
+        opts.rect.size[0],
+        opts.rect.size[1],
+        opts.animated ?? false
       );
     },
   }));

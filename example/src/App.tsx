@@ -129,19 +129,22 @@ export default function App() {
                 canvasSize.current
               );
               ref.current?.zoomToRect({
-                origin: [0, 0],
-                // size: [100, 100],
-                size: canvasSize.current!.map((x) => x * 0.5),
+                rect: {
+                  origin: [0, 0],
+                  size: canvasSize.current!.map((x) => x * 0.5),
+                },
               });
             }}
           />
           <Button
-            title="Zoom to Large Rect"
+            title="Zoom to Large Rect (Animated)"
             onPress={() => {
               ref.current?.zoomToRect({
-                origin: [0, 0],
-                // size: [300, 300],
-                size: canvasSize.current!,
+                rect: {
+                  origin: [0, 0],
+                  size: canvasSize.current!,
+                },
+                animated: true,
               });
             }}
           />

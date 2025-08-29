@@ -5,9 +5,9 @@ import {
   type ComponentRef,
 } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
-import { findNodeHandle } from 'react-native';
 import NativePencilkitView, { Commands } from './PencilkitViewNativeComponent';
-import Util from './NativePencilkitUtil';
+
+const COMMAND_REQUEST_TIMEOUT_MS = 10000;
 
 interface ScrollEvent {
   contentOffset: {
@@ -64,13 +64,20 @@ export interface PencilkitCanvasMethods {
   } | null>;
 }
 
+let nextTxnId = 1;
+
+type PendingCommand = {
+  resolve: (value: any) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+};
 
 export const PencilkitCanvas = forwardRef<
   PencilkitCanvasMethods,
   PencilkitCanvasProps
 >((props, forwardedRef) => {
   const nativeRef = useRef<ComponentRef<typeof NativePencilkitView>>(null);
-
+  const pendingCommands = useRef<Map<number, PendingCommand>>(new Map());
 
   useImperativeHandle(forwardedRef, () => ({
     clear: () => {
@@ -83,40 +90,56 @@ export const PencilkitCanvas = forwardRef<
       Commands.transformDrawing(nativeRef.current!, transform);
     },
     async requestDataUri() {
-      if (nativeRef.current == null) {
-        throw new Error('Native ref is null');
-      }
-      const handle = findNodeHandle(nativeRef.current);
-      if (handle == null) {
-        throw new Error('Unable to get native handle');
-      }
-      const result = await Util.requestDataUri(handle);
-      if (result.success) {
-        return {
-          uri: result.uri!,
-          frame: {
-            origin: [result.frame!.x, result.frame!.y] as const,
-            size: [result.frame!.width, result.frame!.height] as const,
+      return new Promise((resolve, reject) => {
+        if (nativeRef.current == null) {
+          reject(new Error('Native ref is null'));
+          return;
+        }
+
+        const txnId = nextTxnId++;
+        const timeout = setTimeout(() => {
+          pendingCommands.current.delete(txnId);
+          reject(new Error('requestDataUri timeout'));
+        }, COMMAND_REQUEST_TIMEOUT_MS);
+
+        pendingCommands.current.set(txnId, {
+          resolve: (result) => {
+            resolve({
+              uri: result.uri!,
+              frame: {
+                origin: [result.frame!.x, result.frame!.y] as const,
+                size: [result.frame!.width, result.frame!.height] as const,
+              },
+            });
           },
-        };
-      } else {
-        throw new Error(result.error || 'Unknown error');
-      }
+          reject,
+          timeout,
+        });
+
+        Commands.requestDataUri(nativeRef.current!, txnId);
+      });
     },
     async requestDrawingData() {
-      if (nativeRef.current == null) {
-        throw new Error('Native ref is null');
-      }
-      const handle = findNodeHandle(nativeRef.current);
-      if (handle == null) {
-        throw new Error('Unable to get native handle');
-      }
-      const result = await Util.requestDrawingData(handle);
-      if (result.success) {
-        return result.data!;
-      } else {
-        throw new Error(result.error || 'Unknown error');
-      }
+      return new Promise<string>((resolve, reject) => {
+        if (nativeRef.current == null) {
+          reject(new Error('Native ref is null'));
+          return;
+        }
+
+        const txnId = nextTxnId++;
+        const timeout = setTimeout(() => {
+          pendingCommands.current.delete(txnId);
+          reject(new Error('requestDrawingData timeout'));
+        }, COMMAND_REQUEST_TIMEOUT_MS);
+
+        pendingCommands.current.set(txnId, {
+          resolve: (result: string) => resolve(result),
+          reject,
+          timeout,
+        });
+
+        Commands.requestDrawingData(nativeRef.current!, txnId);
+      });
     },
     loadDrawingData: (base64Data: string) => {
       Commands.loadDrawingData(nativeRef.current!, base64Data);
@@ -147,16 +170,63 @@ export const PencilkitCanvas = forwardRef<
     },
 
     async getDrawingBounds() {
-      if (nativeRef.current == null) return null;
-      const handle = findNodeHandle(nativeRef.current);
-      if (handle == null) return null;
-      const bounds = await Util.getDrawingBounds(handle);
-      return {
-        origin: [bounds.x, bounds.y] as const,
-        size: [bounds.width, bounds.height] as const,
-      };
+      return new Promise<{
+        origin: [number, number];
+        size: [number, number];
+      } | null>((resolve, reject) => {
+        if (nativeRef.current == null) {
+          resolve(null);
+          return;
+        }
+
+        const txnId = nextTxnId++;
+        const timeout = setTimeout(() => {
+          pendingCommands.current.delete(txnId);
+          reject(new Error('getDrawingBounds timeout'));
+        }, COMMAND_REQUEST_TIMEOUT_MS);
+
+        pendingCommands.current.set(txnId, {
+          resolve: (bounds) => {
+            resolve({
+              origin: [bounds.x, bounds.y] as const,
+              size: [bounds.width, bounds.height] as const,
+            });
+          },
+          reject,
+          timeout,
+        });
+
+        Commands.requestDrawingBounds(nativeRef.current!, txnId);
+      });
     },
   }));
+
+  const handleCommandResponse = (event: any) => {
+    const response = event.nativeEvent;
+    const pending = pendingCommands.current.get(response.txnId);
+    if (!pending) return;
+
+    clearTimeout(pending.timeout);
+    pendingCommands.current.delete(response.txnId);
+
+    if (response.type === 'drawingBounds') {
+      pending.resolve(response.drawingBounds);
+    } else if (response.type === 'dataUri') {
+      if (response.dataUri?.success) {
+        pending.resolve(response.dataUri);
+      } else {
+        pending.reject(new Error(response.dataUri?.error || 'Unknown error'));
+      }
+    } else if (response.type === 'drawingData') {
+      if (response.drawingData?.success) {
+        pending.resolve(response.drawingData.data);
+      } else {
+        pending.reject(
+          new Error(response.drawingData?.error || 'Unknown error')
+        );
+      }
+    }
+  };
 
   return (
     <NativePencilkitView
@@ -172,6 +242,7 @@ export const PencilkitCanvas = forwardRef<
         props.onScroll ? (e) => props.onScroll!(e.nativeEvent) : undefined
       }
       onZoom={props.onZoom ? (e) => props.onZoom!(e.nativeEvent) : undefined}
+      onCommandResponse={handleCommandResponse}
     />
   );
 });

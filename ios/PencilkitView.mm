@@ -247,6 +247,84 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   return [[_view drawing] bounds];
 }
 
+- (void)requestDrawingBounds:(NSInteger)txnId
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    CGRect bounds = [self drawingBounds];
+    
+    facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
+    event.txnId = (int)txnId;
+    event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DrawingBounds;
+    event.drawingBounds = facebook::react::PencilkitViewEventEmitter::OnCommandResponseDrawingBounds{
+      .x = bounds.origin.x,
+      .y = bounds.origin.y,
+      .width = bounds.size.width,
+      .height = bounds.size.height
+    };
+    eventEmitter->onCommandResponse(event);
+  }
+}
+
+- (void)requestDataUri:(NSInteger)txnId
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    @try {
+      NSDictionary *result = [self requestDataUri];
+      
+      facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
+      event.txnId = (int)txnId;
+      event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DataUri;
+      event.dataUri = facebook::react::PencilkitViewEventEmitter::OnCommandResponseDataUri{
+        .success = true,
+        .uri = std::string([result[@"uri"] UTF8String]),
+        .frame = facebook::react::PencilkitViewEventEmitter::OnCommandResponseDataUriFrame{
+          .x = [result[@"frame"][@"x"] doubleValue],
+          .y = [result[@"frame"][@"y"] doubleValue],
+          .width = [result[@"frame"][@"width"] doubleValue],
+          .height = [result[@"frame"][@"height"] doubleValue]
+        }
+      };
+      eventEmitter->onCommandResponse(event);
+    } @catch (NSException *exception) {
+      facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
+      event.txnId = (int)txnId;
+      event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DataUri;
+      event.dataUri = facebook::react::PencilkitViewEventEmitter::OnCommandResponseDataUri{
+        .success = false,
+        .error = std::string([exception.reason UTF8String])
+      };
+      eventEmitter->onCommandResponse(event);
+    }
+  }
+}
+
+- (void)requestDrawingData:(NSInteger)txnId
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    @try {
+      NSString *result = [self requestDrawingData];
+      
+      facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
+      event.txnId = (int)txnId;
+      event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DrawingData;
+      event.drawingData = facebook::react::PencilkitViewEventEmitter::OnCommandResponseDrawingData{
+        .success = true,
+        .data = std::string([result UTF8String])
+      };
+      eventEmitter->onCommandResponse(event);
+    } @catch (NSException *exception) {
+      facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
+      event.txnId = (int)txnId;
+      event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DrawingData;
+      event.drawingData = facebook::react::PencilkitViewEventEmitter::OnCommandResponseDrawingData{
+        .success = false,
+        .error = std::string([exception.reason UTF8String])
+      };
+      eventEmitter->onCommandResponse(event);
+    }
+  }
+}
+
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

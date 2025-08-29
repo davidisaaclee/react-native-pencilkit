@@ -7,6 +7,7 @@ import {
 import type {
   WithDefault,
   Double,
+  Int32,
   DirectEventHandler,
 } from 'react-native/Libraries/Types/CodegenTypesNamespace';
 
@@ -34,6 +35,33 @@ interface ZoomEvent {
   zoomScale: Double;
 }
 
+interface PKCommandResponse {
+  txnId: Int32;
+  type: 'drawingBounds' | 'dataUri' | 'drawingData';
+  drawingBounds?: {
+    x: Double;
+    y: Double;
+    width: Double;
+    height: Double;
+  };
+  dataUri?: {
+    success: boolean;
+    uri?: string;
+    frame?: {
+      x: Double;
+      y: Double;
+      width: Double;
+      height: Double;
+    };
+    error?: string;
+  };
+  drawingData?: {
+    success: boolean;
+    data?: string;
+    error?: string;
+  };
+}
+
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   drawingEnabled?: WithDefault<boolean, true>;
@@ -43,6 +71,7 @@ interface NativeProps extends ViewProps {
   contentSizeHeight: Double;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
+  onCommandResponse?: DirectEventHandler<PKCommandResponse>;
 }
 
 /** 6-element [a,b,c,d,tx,ty] */
@@ -76,6 +105,18 @@ interface Commands {
     sizeHeight: Double,
     animated: boolean
   ) => void;
+  requestDrawingBounds: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    txnId: Int32
+  ) => void;
+  requestDataUri: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    txnId: Int32
+  ) => void;
+  requestDrawingData: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>,
+    txnId: Int32
+  ) => void;
 }
 
 export const Commands = codegenNativeCommands<Commands>({
@@ -86,6 +127,9 @@ export const Commands = codegenNativeCommands<Commands>({
     'loadDrawingData',
     'setViewport',
     'zoomToRect',
+    'requestDrawingBounds',
+    'requestDataUri',
+    'requestDrawingData',
   ],
 });
 

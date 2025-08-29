@@ -34,24 +34,6 @@ interface ZoomEvent {
   zoomScale: Double;
 }
 
-interface ExportResult {
-  success: boolean;
-  uri?: string;
-  frame?: {
-    x: Double;
-    y: Double;
-    width: Double;
-    height: Double;
-  };
-  error?: string;
-}
-
-interface DrawingDataResult {
-  success: boolean;
-  data?: string;
-  error?: string;
-}
-
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   drawingEnabled?: WithDefault<boolean, true>;

@@ -141,63 +141,50 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   [_view setDrawing:transformedDrawing];
 }
 
-- (void)requestDataUri
+- (NSDictionary *)requestDataUri
 {
-  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
-    PKDrawing *currentDrawing = [_view drawing];
-    UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:1.0];
+  PKDrawing *currentDrawing = [_view drawing];
+  UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:1.0];
 
-    if (image) {
-      NSData *imageData = UIImagePNGRepresentation(image);
-      if (imageData) {
-        NSString *base64String = [imageData base64EncodedStringWithOptions:0];
-        NSString *dataUri = [NSString stringWithFormat:@"data:image/png;base64,%@", base64String];
-
-        PencilkitViewEventEmitter::OnDataUri event;
-        event.success = true;
-        event.uri = std::string([dataUri UTF8String]);
-        event.frame = facebook::react::PencilkitViewEventEmitter::OnDataUriFrame{
-          .x = currentDrawing.bounds.origin.x,
-          .y = currentDrawing.bounds.origin.y,
-          .width = currentDrawing.bounds.size.width,
-          .height = currentDrawing.bounds.size.height
-        };
-        eventEmitter->onDataUri(event);
-      } else {
-        PencilkitViewEventEmitter::OnDataUri event;
-        event.success = false;
-        event.error = std::string("Failed to convert image to PNG data");
-        eventEmitter->onDataUri(event);
-      }
-    } else {
-      PencilkitViewEventEmitter::OnDataUri event;
-      event.success = false;
-      event.error = std::string("Failed to generate image from drawing");
-      eventEmitter->onDataUri(event);
-    }
+  if (!image) {
+    @throw [NSException exceptionWithName:@"PencilkitError" 
+                                   reason:@"Failed to generate image from drawing" 
+                                 userInfo:nil];
   }
+  
+  NSData *imageData = UIImagePNGRepresentation(image);
+  if (!imageData) {
+    @throw [NSException exceptionWithName:@"PencilkitError" 
+                                   reason:@"Failed to convert image to PNG data" 
+                                 userInfo:nil];
+  }
+  
+  NSString *base64String = [imageData base64EncodedStringWithOptions:0];
+  NSString *dataUri = [NSString stringWithFormat:@"data:image/png;base64,%@", base64String];
+
+  return @{
+    @"uri": dataUri,
+    @"frame": @{
+      @"x": @(currentDrawing.bounds.origin.x),
+      @"y": @(currentDrawing.bounds.origin.y),
+      @"width": @(currentDrawing.bounds.size.width),
+      @"height": @(currentDrawing.bounds.size.height)
+    }
+  };
 }
 
-- (void)requestDrawingData
+- (NSString *)requestDrawingData
 {
-  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
-    PKDrawing *currentDrawing = [_view drawing];
-    NSData *drawingData = [currentDrawing dataRepresentation];
+  PKDrawing *currentDrawing = [_view drawing];
+  NSData *drawingData = [currentDrawing dataRepresentation];
 
-    if (drawingData) {
-      NSString *base64String = [drawingData base64EncodedStringWithOptions:0];
-
-      PencilkitViewEventEmitter::OnDrawingData event;
-      event.success = true;
-      event.data = std::string([base64String UTF8String]);
-      eventEmitter->onDrawingData(event);
-    } else {
-      PencilkitViewEventEmitter::OnDrawingData event;
-      event.success = false;
-      event.error = std::string("Failed to get drawing data representation");
-      eventEmitter->onDrawingData(event);
-    }
+  if (!drawingData) {
+    @throw [NSException exceptionWithName:@"PencilkitError" 
+                                   reason:@"Failed to get drawing data representation" 
+                                 userInfo:nil];
   }
+  
+  return [drawingData base64EncodedStringWithOptions:0];
 }
 
 - (void)loadDrawingData:(NSString *)base64String

@@ -34,5 +34,38 @@ RCT_EXPORT_MODULE()
   });
 }
 
+- (void)requestDataUri:(double)viewId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
+{
+  RCTExecuteOnMainQueue(^{
+    @try {
+      PencilkitView *view = [self getView:viewId];
+      NSDictionary *result = [view requestDataUri];
+      resolve(@{
+        @"success": @YES,
+        @"uri": result[@"uri"],
+        @"frame": result[@"frame"]
+      });
+    } @catch (NSException *exception) {
+      reject(@"PencilkitError", exception.reason, nil);
+    }
+  });
+}
+
+- (void)requestDrawingData:(double)viewId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
+{
+  RCTExecuteOnMainQueue(^{
+    @try {
+      PencilkitView *view = [self getView:viewId];
+      NSString *result = [view requestDrawingData];
+      resolve(@{
+        @"success": @YES,
+        @"data": result
+      });
+    } @catch (NSException *exception) {
+      reject(@"PencilkitError", exception.reason, nil);
+    }
+  });
+}
+
 @end
 

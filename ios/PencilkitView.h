@@ -9,6 +9,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PencilkitView : RCTViewComponentView
 - (CGRect)drawingBounds;
+- (NSDictionary *)requestDataUri;
+- (NSString *)requestDrawingData;
 @end
 
 NS_ASSUME_NONNULL_END

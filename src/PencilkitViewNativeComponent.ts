@@ -61,8 +61,6 @@ interface NativeProps extends ViewProps {
   contentSizeHeight: Double;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
-  onDataUri?: DirectEventHandler<ExportResult>;
-  onDrawingData?: DirectEventHandler<DrawingDataResult>;
 }
 
 /** 6-element [a,b,c,d,tx,ty] */
@@ -77,12 +75,6 @@ interface Commands {
   setToolPickerVisible: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
     visible: boolean
-  ) => void;
-  requestDataUri: (
-    viewRef: React.ElementRef<HostComponent<NativeProps>>
-  ) => void;
-  requestDrawingData: (
-    viewRef: React.ElementRef<HostComponent<NativeProps>>
   ) => void;
   loadDrawingData: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
@@ -109,8 +101,6 @@ export const Commands = codegenNativeCommands<Commands>({
     'setToolPickerVisible',
     'clear',
     'transformDrawing',
-    'requestDataUri',
-    'requestDrawingData',
     'loadDrawingData',
     'setViewport',
     'zoomToRect',

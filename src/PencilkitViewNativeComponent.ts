@@ -111,7 +111,8 @@ interface Commands {
   ) => void;
   requestDataUri: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
-    txnId: Int32
+    txnId: Int32,
+    renderScale: Double
   ) => void;
   requestDrawingData: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>,

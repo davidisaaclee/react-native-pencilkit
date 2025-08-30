@@ -143,8 +143,13 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
 
 - (NSDictionary *)requestDataUri
 {
+  return [self requestDataUriWithScale:1.0];
+}
+
+- (NSDictionary *)requestDataUriWithScale:(double)scale
+{
   PKDrawing *currentDrawing = [_view drawing];
-  UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:1.0];
+  UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:scale];
 
   if (!image) {
     @throw [NSException exceptionWithName:@"PencilkitError" 
@@ -265,11 +270,11 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   }
 }
 
-- (void)requestDataUri:(NSInteger)txnId
+- (void)requestDataUri:(NSInteger)txnId renderScale:(double)renderScale
 {
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     @try {
-      NSDictionary *result = [self requestDataUri];
+      NSDictionary *result = [self requestDataUriWithScale:renderScale];
       
       facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
       event.txnId = (int)txnId;

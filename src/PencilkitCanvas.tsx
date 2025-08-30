@@ -42,7 +42,7 @@ export interface PencilkitCanvasMethods {
   clear: () => void;
   setToolPickerVisible: (visible: boolean) => void;
   transformDrawing: (transform: Readonly<Matrix2D>) => void;
-  requestDataUri: () => Promise<{
+  renderImage: (opts?: Partial<{ renderScale: number }>) => Promise<{
     uri: string;
     frame: { origin: [number, number]; size: [number, number] };
   }>;
@@ -89,7 +89,8 @@ export const PencilkitCanvas = forwardRef<
     transformDrawing: (transform: Readonly<Matrix2D>) => {
       Commands.transformDrawing(nativeRef.current!, transform);
     },
-    async requestDataUri() {
+    async renderImage(opts: Partial<{ renderScale: number }> = {}) {
+      const { renderScale = 1 } = opts;
       return new Promise((resolve, reject) => {
         if (nativeRef.current == null) {
           reject(new Error('Native ref is null'));
@@ -99,7 +100,7 @@ export const PencilkitCanvas = forwardRef<
         const txnId = nextTxnId++;
         const timeout = setTimeout(() => {
           pendingCommands.current.delete(txnId);
-          reject(new Error('requestDataUri timeout'));
+          reject(new Error('renderImage timeout'));
         }, COMMAND_REQUEST_TIMEOUT_MS);
 
         pendingCommands.current.set(txnId, {
@@ -116,7 +117,7 @@ export const PencilkitCanvas = forwardRef<
           timeout,
         });
 
-        Commands.requestDataUri(nativeRef.current!, txnId);
+        Commands.requestDataUri(nativeRef.current!, txnId, renderScale);
       });
     },
     async requestDrawingData() {

@@ -384,20 +384,43 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   [self emitToolPickerLayoutEvent:toolPicker];
 }
 
+- (UIWindow *)findKeyWindow {
+  // Modern approach for iOS 13+ with scene support
+  if (@available(iOS 13.0, *)) {
+    for (UIWindowScene *windowScene in [UIApplication sharedApplication].connectedScenes) {
+      if (windowScene.activationState == UISceneActivationStateForegroundActive) {
+        for (UIWindow *window in windowScene.windows) {
+          if (window.isKeyWindow) {
+            return window;
+          }
+        }
+      }
+    }
+
+    // Fallback: find any key window in any scene
+    for (UIWindowScene *windowScene in [UIApplication sharedApplication].connectedScenes) {
+      for (UIWindow *window in windowScene.windows) {
+        if (window.isKeyWindow) {
+          return window;
+        }
+      }
+    }
+  } else {
+    // Fallback for iOS 12 and earlier
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [UIApplication sharedApplication].keyWindow;
+#pragma clang diagnostic pop
+  }
+
+  return nil;
+}
+
 - (void)emitToolPickerLayoutEvent:(PKToolPicker *)toolPicker
 {
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     // Get the root view (the application's key window's root view)
-    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
-    if (!keyWindow) {
-      // Fallback to find a key window
-      for (UIWindow *window in [UIApplication sharedApplication].windows) {
-        if (window.isKeyWindow) {
-          keyWindow = window;
-          break;
-        }
-      }
-    }
+    UIWindow *keyWindow = [self findKeyWindow];
 
     if (keyWindow && keyWindow.rootViewController && keyWindow.rootViewController.view) {
       UIView *rootView = keyWindow.rootViewController.view;

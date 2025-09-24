@@ -1,5 +1,12 @@
 import { useRef, useState, type ComponentRef } from 'react';
-import { View, StyleSheet, Button, Image, ScrollView } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Button,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { PencilkitCanvas } from 'react-native-pencilkit';
 
@@ -8,6 +15,7 @@ export default function App() {
   const [exportedImage, setExportedImage] = useState<string | null>(null);
   const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
   const [drawingEnabled, setDrawingEnabled] = useState(true);
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false);
 
   const canvasSize = useRef<[number, number] | null>(null);
 
@@ -95,7 +103,9 @@ export default function App() {
               title="Export Image"
               onPress={async () => {
                 try {
-                  const result = await ref.current?.requestDataUri();
+                  const result = await ref.current?.renderImage({
+                    renderScale: 2,
+                  });
                   if (result) {
                     console.log('Export successful:', result.uri);
                     console.log('Drawing frame:', result.frame);
@@ -205,19 +215,42 @@ export default function App() {
           </View>
         </ScrollView>
         {exportedImage && (
-          <Image
-            source={{ uri: exportedImage }}
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              right: 20,
-              width: 100,
-              height: 100,
-              borderWidth: 2,
-              borderColor: 'white',
-            }}
-            resizeMode="contain"
-          />
+          <TouchableOpacity
+            style={[
+              {
+                position: 'absolute',
+                borderWidth: 2,
+                borderColor: 'white',
+                backgroundColor: 'black',
+              },
+              isImageFullscreen
+                ? {
+                    // top: 0,
+                    // left: 0,
+                    // right: 0,
+                    // bottom: 0,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    transform: [{ scale: 4 }],
+                  }
+                : {
+                    bottom: 20,
+                    right: 20,
+                    width: 100,
+                    height: 100,
+                  },
+            ]}
+            onPress={() => setIsImageFullscreen(!isImageFullscreen)}
+          >
+            <Image
+              source={{ uri: exportedImage }}
+              style={{
+                width: '180%',
+                height: '180%',
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         )}
       </SafeAreaView>
     </SafeAreaProvider>

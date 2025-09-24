@@ -25,6 +25,15 @@ interface ScrollEvent {
   zoomScale: number;
 }
 
+interface ToolPickerLayoutEvent {
+  frame: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null;
+}
+
 export interface PencilkitCanvasProps {
   drawingPolicy: 'default' | 'anyInput' | 'pencilOnly';
   minimumZoomScale?: number;
@@ -33,6 +42,7 @@ export interface PencilkitCanvasProps {
   drawingEnabled?: boolean;
   onScroll?: (event: ScrollEvent) => void;
   onZoom?: (event: ScrollEvent) => void;
+  onToolPickerLayout?: (event: ToolPickerLayoutEvent) => void;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -243,6 +253,18 @@ export const PencilkitCanvas = forwardRef<
         props.onScroll ? (e) => props.onScroll!(e.nativeEvent) : undefined
       }
       onZoom={props.onZoom ? (e) => props.onZoom!(e.nativeEvent) : undefined}
+      onToolPickerLayout={
+        props.onToolPickerLayout ? (e) => {
+          const nativeFrame = e.nativeEvent.frame;
+          // Check if frame is invalid (hidden tool picker reports Infinity, Infinity, 0, 0)
+          const isInvalidFrame = !isFinite(nativeFrame.x) || !isFinite(nativeFrame.y) ||
+                                (nativeFrame.width === 0 && nativeFrame.height === 0);
+
+          props.onToolPickerLayout!({
+            frame: isInvalidFrame ? null : nativeFrame
+          });
+        } : undefined
+      }
       onCommandResponse={handleCommandResponse}
     />
   );

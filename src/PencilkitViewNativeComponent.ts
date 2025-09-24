@@ -62,6 +62,15 @@ interface PKCommandResponse {
   };
 }
 
+interface ToolPickerLayoutEvent {
+  frame: {
+    x: Double;
+    y: Double;
+    width: Double;
+    height: Double;
+  };
+}
+
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   drawingEnabled?: WithDefault<boolean, true>;
@@ -71,6 +80,7 @@ interface NativeProps extends ViewProps {
   contentSizeHeight: Double;
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
+  onToolPickerLayout?: DirectEventHandler<ToolPickerLayoutEvent>;
   onCommandResponse?: DirectEventHandler<PKCommandResponse>;
 }
 

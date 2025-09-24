@@ -7,7 +7,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface PencilkitView : RCTViewComponentView
+@interface PencilkitView : RCTViewComponentView <PKToolPickerObserver>
 - (CGRect)drawingBounds;
 - (NSDictionary *)requestDataUri;
 - (NSString *)requestDrawingData;

@@ -38,6 +38,7 @@ using namespace facebook::react;
 
     _toolPicker = [[PKToolPicker alloc] init];
     [_toolPicker addObserver:_view];
+    [_toolPicker addObserver:self];
     [_toolPicker setVisible:YES forFirstResponder:_view];
 
     _view.delegate = self;
@@ -50,6 +51,7 @@ using namespace facebook::react;
 
 - (void)dealloc {
   [_toolPicker removeObserver:_view];
+  [_toolPicker removeObserver:self];
 }
 
 - (void)handleCommand:(const NSString *)commandName args:(const NSArray *)args
@@ -363,6 +365,56 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
     };
     event.zoomScale = scrollView.zoomScale;
     eventEmitter->onZoom(event);
+  }
+}
+
+#pragma mark - PKToolPickerObserver
+
+- (void)toolPickerVisibilityDidChange:(PKToolPicker *)toolPicker
+{
+  // Add a small delay to ensure the tool picker's internal state has fully updated
+  // before reading the frame, as the callback happens before the frame is updated
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self emitToolPickerLayoutEvent:toolPicker];
+  });
+}
+
+- (void)toolPickerFramesObscuredDidChange:(PKToolPicker *)toolPicker
+{
+  [self emitToolPickerLayoutEvent:toolPicker];
+}
+
+- (void)emitToolPickerLayoutEvent:(PKToolPicker *)toolPicker
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    // Get the root view (the application's key window's root view)
+    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
+    if (!keyWindow) {
+      // Fallback to find a key window
+      for (UIWindow *window in [UIApplication sharedApplication].windows) {
+        if (window.isKeyWindow) {
+          keyWindow = window;
+          break;
+        }
+      }
+    }
+
+    if (keyWindow && keyWindow.rootViewController && keyWindow.rootViewController.view) {
+      UIView *rootView = keyWindow.rootViewController.view;
+      CGRect obscuredFrame = [toolPicker frameObscuredInView:rootView];
+
+      // Convert to screen coordinates
+      CGRect screenFrame = [rootView convertRect:obscuredFrame toView:nil];
+
+      facebook::react::PencilkitViewEventEmitter::OnToolPickerLayout event;
+      event.frame = facebook::react::PencilkitViewEventEmitter::OnToolPickerLayoutFrame{
+        .x = screenFrame.origin.x,
+        .y = screenFrame.origin.y,
+        .width = screenFrame.size.width,
+        .height = screenFrame.size.height
+      };
+      eventEmitter->onToolPickerLayout(event);
+    }
   }
 }
 

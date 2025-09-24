@@ -16,6 +16,12 @@ export default function App() {
   const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
   const [drawingEnabled, setDrawingEnabled] = useState(true);
   const [isImageFullscreen, setIsImageFullscreen] = useState(false);
+  const [toolPickerFrame, setToolPickerFrame] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   const canvasSize = useRef<[number, number] | null>(null);
 
@@ -45,6 +51,10 @@ export default function App() {
             }}
             onScroll={(e) => {
               console.log('Scroll event', e);
+            }}
+            onToolPickerLayout={(e) => {
+              console.log('Tool picker layout:', e.frame);
+              setToolPickerFrame(e.frame);
             }}
             drawingPolicy="anyInput"
             minimumZoomScale={0.5}
@@ -251,6 +261,24 @@ export default function App() {
               resizeMode="contain"
             />
           </TouchableOpacity>
+        )}
+
+        {/* View positioned behind the tool picker */}
+        {toolPickerFrame && (
+          <View
+            style={{
+              position: 'absolute',
+              left: toolPickerFrame.x,
+              top: toolPickerFrame.y,
+              width: toolPickerFrame.width,
+              height: toolPickerFrame.height,
+              backgroundColor: 'rgba(255, 0, 0, 0.3)', // Semi-transparent red
+              borderWidth: 2,
+              borderColor: 'red',
+              borderStyle: 'dashed',
+              pointerEvents: 'none', // Allow touches to pass through
+            }}
+          />
         )}
       </SafeAreaView>
     </SafeAreaProvider>

@@ -133,6 +133,9 @@ interface Commands {
     viewRef: React.ElementRef<HostComponent<NativeProps>>,
     txnId: Int32
   ) => void;
+  getDrawingRequiredContentVersion: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>
+  ) => string | null;
 }
 
 export const Commands = codegenNativeCommands<Commands>({
@@ -146,6 +149,7 @@ export const Commands = codegenNativeCommands<Commands>({
     'requestDrawingBounds',
     'requestDataUri',
     'requestDrawingData',
+    'getDrawingRequiredContentVersion',
   ],
 });
 

@@ -207,6 +207,35 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   }
 }
 
+- (NSString *)getDrawingRequiredContentVersion
+{
+  PKDrawing *currentDrawing = [_view drawing];
+  if (!currentDrawing) {
+    return nil;
+  }
+
+  // Map PKContentVersion enum to version strings
+  PKContentVersion version = currentDrawing.requiredContentVersion;
+  if (@available(iOS 17.2, *)) {
+    if (version == PKContentVersionVersion4) {
+      return @"version4";
+    }
+  }
+  if (@available(iOS 17.0, *)) {
+    if (version == PKContentVersionVersion3) {
+      return @"version3";
+    }
+  }
+  if (@available(iOS 16.4, *)) {
+    if (version == PKContentVersionVersion2) {
+      return @"version2";
+    }
+  }
+
+  // Default/fallback to version1
+  return @"version1";
+}
+
 - (void)setViewport:(double)contentOffsetX
         contentOffsetY:(double)contentOffsetY
              zoomScale:(double)zoomScale

@@ -53,6 +53,8 @@ export interface PencilkitCanvasProps {
 
 type Matrix2D = [number, number, number, number, number, number];
 
+type PKContentVersion = 'version1' | 'version2' | 'version3' | 'version4';
+
 export interface PencilkitCanvasMethods {
   clear: () => void;
   setToolPickerVisible: (visible: boolean) => void;
@@ -77,6 +79,7 @@ export interface PencilkitCanvasMethods {
     origin: [number, number];
     size: [number, number];
   } | null>;
+  getDrawingRequiredContentVersion(): PKContentVersion | null;
 }
 
 let nextTxnId = 1;
@@ -214,6 +217,13 @@ export const PencilkitCanvas = forwardRef<
 
         Commands.requestDrawingBounds(nativeRef.current!, txnId);
       });
+    },
+
+    getDrawingRequiredContentVersion() {
+      if (nativeRef.current == null) {
+        return null;
+      }
+      return Commands.getDrawingRequiredContentVersion(nativeRef.current!);
     },
   }));
 

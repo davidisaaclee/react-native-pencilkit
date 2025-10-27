@@ -1,4 +1,4 @@
-import { useRef, useState, type ComponentRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PencilkitCanvas } from 'react-native-pencilkit';
+import { PencilkitCanvas, type PencilkitCanvasMethods } from 'react-native-pencilkit';
 
 export default function App() {
-  const ref = useRef<ComponentRef<typeof PencilkitCanvas>>(null);
-  const mirrorRef = useRef<ComponentRef<typeof PencilkitCanvas>>(null);
+  const ref = useRef<PencilkitCanvasMethods>(null);
+  const mirrorRef = useRef<PencilkitCanvasMethods>(null);
   const [exportedImage, setExportedImage] = useState<string | null>(null);
   const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
   const [drawingEnabled, setDrawingEnabled] = useState(true);
@@ -23,7 +23,6 @@ export default function App() {
     width: number;
     height: number;
   } | null>(null);
-  const [mirrorDrawingData, setMirrorDrawingData] = useState<string | null>(null);
 
   const canvasSize = useRef<[number, number] | null>(null);
 
@@ -63,7 +62,6 @@ export default function App() {
                 'Drawing changed, base64 length:',
                 e.base64Data.length
               );
-              setMirrorDrawingData(e.base64Data);
               mirrorRef.current?.loadDrawingData(e.base64Data);
             }}
             drawingPolicy="anyInput"
@@ -234,7 +232,7 @@ export default function App() {
                 ref.current?.zoomToRect({
                   rect: {
                     origin: [0, 0],
-                    size: canvasSize.current!.map((x) => x * 0.5),
+                    size: canvasSize.current!.map((x) => x * 0.5) as [number, number],
                   },
                 });
               }}

@@ -224,14 +224,14 @@ export const PencilkitCanvas = forwardRef<
       if (nativeRef.current == null) {
         return null;
       }
-      return Commands.getDrawingRequiredContentVersion(nativeRef.current!);
+      return Commands.getDrawingRequiredContentVersion(nativeRef.current!) as PKContentVersion | null;
     },
 
     getMaximumSupportedContentVersion() {
       if (nativeRef.current == null) {
         throw new Error('Native ref is null');
       }
-      return Commands.getMaximumSupportedContentVersion(nativeRef.current!);
+      return Commands.getMaximumSupportedContentVersion(nativeRef.current!) as PKContentVersion;
     },
   }));
 

@@ -80,7 +80,7 @@ export interface PencilkitCanvasMethods {
     size: [number, number];
   } | null>;
   getDrawingRequiredContentVersion(): PKContentVersion | null;
-  getMaximumSupportedContentVersion(): PKContentVersion;
+  getMaximumSupportedContentVersion(): PKContentVersion | null;
 }
 
 let nextTxnId = 1;
@@ -229,9 +229,9 @@ export const PencilkitCanvas = forwardRef<
 
     getMaximumSupportedContentVersion() {
       if (nativeRef.current == null) {
-        throw new Error('Native ref is null');
+        return null;
       }
-      return Commands.getMaximumSupportedContentVersion(nativeRef.current!) as PKContentVersion;
+      return Commands.getMaximumSupportedContentVersion(nativeRef.current!) as PKContentVersion | null;
     },
   }));
 

@@ -207,24 +207,17 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   }
 }
 
-- (NSString *)contentVersionString:(PKContentVersion)version
-{
-  if (@available(iOS 17.2, *)) {
-    if (version == PKContentVersionVersion4) {
-      return @"version4";
-    }
-  }
-  if (@available(iOS 17.0, *)) {
-    if (version == PKContentVersionVersion3) {
+- (NSString *)contentVersionString:(PKContentVersion)version API_AVAILABLE(ios(17.0)) {
+  if (@available(iOS 17.5, *)) {
+    if (version == PKContentVersion3) {
       return @"version3";
     }
   }
-  if (@available(iOS 16.4, *)) {
-    if (version == PKContentVersionVersion2) {
+  if (@available(iOS 17.0, *)) {
+    if (version == PKContentVersion2) {
       return @"version2";
     }
   }
-
   // Default/fallback to version1
   return @"version1";
 }
@@ -236,12 +229,20 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
     return nil;
   }
 
-  return [self contentVersionString:currentDrawing.requiredContentVersion];
+  if (@available(iOS 17.0, *)) {
+    return [self contentVersionString:currentDrawing.requiredContentVersion];
+  } else {
+    return nil;
+  }
 }
 
 - (NSString *)getMaximumSupportedContentVersion
 {
-  return [self contentVersionString:_view.maximumSupportedContentVersion];
+  if (@available(iOS 17.0, *)) {
+    return [self contentVersionString:_view.maximumSupportedContentVersion];
+  } else {
+    return nil;
+  }
 }
 
 - (void)setViewport:(double)contentOffsetX

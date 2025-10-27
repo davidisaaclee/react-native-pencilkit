@@ -138,7 +138,7 @@ interface Commands {
   ) => string | null;
   getMaximumSupportedContentVersion: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>
-  ) => string;
+  ) => string | null;
 }
 
 export const Commands = codegenNativeCommands<Commands>({

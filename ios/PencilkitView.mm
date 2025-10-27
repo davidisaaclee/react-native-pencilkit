@@ -207,15 +207,8 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   }
 }
 
-- (NSString *)getDrawingRequiredContentVersion
+- (NSString *)contentVersionString:(PKContentVersion)version
 {
-  PKDrawing *currentDrawing = [_view drawing];
-  if (!currentDrawing) {
-    return nil;
-  }
-
-  // Map PKContentVersion enum to version strings
-  PKContentVersion version = currentDrawing.requiredContentVersion;
   if (@available(iOS 17.2, *)) {
     if (version == PKContentVersionVersion4) {
       return @"version4";
@@ -234,6 +227,21 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
 
   // Default/fallback to version1
   return @"version1";
+}
+
+- (NSString *)getDrawingRequiredContentVersion
+{
+  PKDrawing *currentDrawing = [_view drawing];
+  if (!currentDrawing) {
+    return nil;
+  }
+
+  return [self contentVersionString:currentDrawing.requiredContentVersion];
+}
+
+- (NSString *)getMaximumSupportedContentVersion
+{
+  return [self contentVersionString:_view.maximumSupportedContentVersion];
 }
 
 - (void)setViewport:(double)contentOffsetX

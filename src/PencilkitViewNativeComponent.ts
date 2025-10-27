@@ -136,6 +136,9 @@ interface Commands {
   getDrawingRequiredContentVersion: (
     viewRef: React.ElementRef<HostComponent<NativeProps>>
   ) => string | null;
+  getMaximumSupportedContentVersion: (
+    viewRef: React.ElementRef<HostComponent<NativeProps>>
+  ) => string;
 }
 
 export const Commands = codegenNativeCommands<Commands>({
@@ -150,6 +153,7 @@ export const Commands = codegenNativeCommands<Commands>({
     'requestDataUri',
     'requestDrawingData',
     'getDrawingRequiredContentVersion',
+    'getMaximumSupportedContentVersion',
   ],
 });
 

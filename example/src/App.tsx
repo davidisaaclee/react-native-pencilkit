@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PencilkitCanvas, type PencilkitCanvasMethods } from 'react-native-pencilkit';
+import { PencilkitCanvas, type PencilkitCanvasMethods, PencilKit } from 'react-native-pencilkit';
 
 export default function App() {
   const ref = useRef<PencilkitCanvasMethods>(null);
@@ -116,6 +116,17 @@ export default function App() {
             title="Clear"
             onPress={() => {
               ref.current?.clear();
+            }}
+          />
+          <Button
+            title="Test PencilKit.addTwo(5)"
+            onPress={async () => {
+              try {
+                const result = await PencilKit.addTwo(5);
+                console.log('PencilKit.addTwo(5) =', result);
+              } catch (error) {
+                console.error('PencilKit.addTwo failed:', error);
+              }
             }}
           />
           <View>

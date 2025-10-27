@@ -1,4 +1,4 @@
-#import <PencilkitViewSpec/PencilkitViewSpec.h>
+#import <RNPencilKit/RNPencilKit.h>
 
 @interface PencilKitModule : NativePencilKitModuleSpecBase <NativePencilKitModuleSpec>
 

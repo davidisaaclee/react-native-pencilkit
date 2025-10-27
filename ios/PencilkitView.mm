@@ -1,9 +1,9 @@
 #import "PencilkitView.h"
 
-#import <react/renderer/components/PencilkitViewSpec/ComponentDescriptors.h>
-#import <react/renderer/components/PencilkitViewSpec/EventEmitters.h>
-#import <react/renderer/components/PencilkitViewSpec/Props.h>
-#import <react/renderer/components/PencilkitViewSpec/RCTComponentViewHelpers.h>
+#import <react/renderer/components/RNPencilKit/ComponentDescriptors.h>
+#import <react/renderer/components/RNPencilKit/EventEmitters.h>
+#import <react/renderer/components/RNPencilKit/Props.h>
+#import <react/renderer/components/RNPencilKit/RCTComponentViewHelpers.h>
 
 #import "RCTFabricComponentsPlugins.h"
 
@@ -81,7 +81,7 @@ using namespace facebook::react;
   if (!isnan(newViewProps.maximumZoomScale) && oldViewProps.maximumZoomScale != newViewProps.maximumZoomScale) {
     [_view setMaximumZoomScale:newViewProps.maximumZoomScale];
   }
-  
+
   CGSize newContentSize = _view.contentSize;
   if (!isnan(newViewProps.contentSizeWidth)) {
     newContentSize.width = newViewProps.contentSizeWidth;
@@ -154,18 +154,18 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   UIImage *image = [currentDrawing imageFromRect:currentDrawing.bounds scale:scale];
 
   if (!image) {
-    @throw [NSException exceptionWithName:@"PencilkitError" 
-                                   reason:@"Failed to generate image from drawing" 
+    @throw [NSException exceptionWithName:@"PencilkitError"
+                                   reason:@"Failed to generate image from drawing"
                                  userInfo:nil];
   }
-  
+
   NSData *imageData = UIImagePNGRepresentation(image);
   if (!imageData) {
-    @throw [NSException exceptionWithName:@"PencilkitError" 
-                                   reason:@"Failed to convert image to PNG data" 
+    @throw [NSException exceptionWithName:@"PencilkitError"
+                                   reason:@"Failed to convert image to PNG data"
                                  userInfo:nil];
   }
-  
+
   NSString *base64String = [imageData base64EncodedStringWithOptions:0];
   NSString *dataUri = [NSString stringWithFormat:@"data:image/png;base64,%@", base64String];
 
@@ -186,11 +186,11 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   NSData *drawingData = [currentDrawing dataRepresentation];
 
   if (!drawingData) {
-    @throw [NSException exceptionWithName:@"PencilkitError" 
-                                   reason:@"Failed to get drawing data representation" 
+    @throw [NSException exceptionWithName:@"PencilkitError"
+                                   reason:@"Failed to get drawing data representation"
                                  userInfo:nil];
   }
-  
+
   return [drawingData base64EncodedStringWithOptions:0];
 }
 
@@ -251,7 +251,7 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
 {
   CGPoint currentContentOffset = _view.contentOffset;
   CGFloat currentZoomScale = _view.zoomScale;
-  
+
   // Update content offset if provided (not NaN)
   CGPoint newContentOffset = currentContentOffset;
   if (!isnan(contentOffsetX)) {
@@ -260,18 +260,18 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   if (!isnan(contentOffsetY)) {
     newContentOffset.y = contentOffsetY;
   }
-  
+
   // Update zoom scale if provided (not NaN)
   CGFloat newZoomScale = currentZoomScale;
   if (!isnan(zoomScale)) {
     newZoomScale = zoomScale;
   }
-  
+
   // Apply the changes
   if (!isnan(zoomScale)) {
     [_view setZoomScale:newZoomScale animated:NO];
   }
-  
+
   if (!isnan(contentOffsetX) || !isnan(contentOffsetY)) {
     [_view setContentOffset:newContentOffset animated:NO];
   }
@@ -296,7 +296,7 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
 {
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     CGRect bounds = [self drawingBounds];
-    
+
     facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
     event.txnId = (int)txnId;
     event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DrawingBounds;
@@ -315,7 +315,7 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     @try {
       NSDictionary *result = [self requestDataUriWithScale:renderScale];
-      
+
       facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
       event.txnId = (int)txnId;
       event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DataUri;
@@ -348,7 +348,7 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
     @try {
       NSString *result = [self requestDrawingData];
-      
+
       facebook::react::PencilkitViewEventEmitter::OnCommandResponse event;
       event.txnId = (int)txnId;
       event.type = facebook::react::PencilkitViewEventEmitter::OnCommandResponseType::DrawingData;

@@ -8,7 +8,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PencilkitCanvas, type PencilkitCanvasMethods, PencilKit } from 'react-native-pencilkit';
+import {
+  PencilkitCanvas,
+  type PencilkitCanvasMethods,
+  PencilKit,
+} from 'react-native-pencilkit';
 
 export default function App() {
   const ref = useRef<PencilkitCanvasMethods>(null);
@@ -171,6 +175,31 @@ export default function App() {
               }}
             />
             <Button
+              title="Export Image (static)"
+              onPress={async () => {
+                try {
+                  const data = await ref.current?.requestDrawingData();
+                  if (data) {
+                    console.log('got data, rendering...');
+                    const renderResult = await PencilKit.renderDrawingData(
+                      data
+                      // { x: -6, y: 175, width: 100, height: 161 }
+                      // undefined,
+                      // undefined
+                    );
+                    console.log(
+                      'rendered to',
+                      renderResult.imagePath,
+                      renderResult
+                    );
+                    setExportedImage(`file://${renderResult.imagePath}`);
+                  }
+                } catch (error) {
+                  console.error('Export failed:', error);
+                }
+              }}
+            />
+            <Button
               title="Save Drawing"
               onPress={async () => {
                 try {
@@ -243,7 +272,10 @@ export default function App() {
                 ref.current?.zoomToRect({
                   rect: {
                     origin: [0, 0],
-                    size: canvasSize.current!.map((x) => x * 0.5) as [number, number],
+                    size: canvasSize.current!.map((x) => x * 0.5) as [
+                      number,
+                      number,
+                    ],
                   },
                 });
               }}

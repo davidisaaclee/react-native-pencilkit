@@ -441,4 +441,22 @@ Class<RCTComponentViewProtocol> PencilkitViewCls(void)
   }
 }
 
+#pragma mark - PKCanvasViewDelegate
+
+- (void)canvasViewDrawingDidChange:(PKCanvasView *)canvasView
+{
+  if (auto eventEmitter = std::static_pointer_cast<PencilkitViewEventEmitter const>(_eventEmitter)) {
+    @try {
+      NSString *base64Data = [self requestDrawingData];
+
+      facebook::react::PencilkitViewEventEmitter::OnDrawingChanged event;
+      event.base64Data = std::string([base64Data UTF8String]);
+      eventEmitter->onDrawingChanged(event);
+    } @catch (NSException *exception) {
+      // Log but don't crash on drawing extraction errors
+      NSLog(@"Error extracting drawing data: %@", exception.reason);
+    }
+  }
+}
+
 @end

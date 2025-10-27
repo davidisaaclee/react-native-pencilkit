@@ -56,6 +56,12 @@ export default function App() {
               console.log('Tool picker layout:', e.frame);
               setToolPickerFrame(e.frame);
             }}
+            onDrawingChanged={(e) => {
+              console.log(
+                'Drawing changed, base64 length:',
+                e.base64Data.length
+              );
+            }}
             drawingPolicy="anyInput"
             minimumZoomScale={0.5}
             maximumZoomScale={5}

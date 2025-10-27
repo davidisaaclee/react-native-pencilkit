@@ -71,6 +71,10 @@ interface ToolPickerLayoutEvent {
   };
 }
 
+interface DrawingChangedEvent {
+  base64Data: string;
+}
+
 interface NativeProps extends ViewProps {
   drawingPolicy?: WithDefault<'default' | 'anyInput' | 'pencilOnly', 'default'>;
   drawingEnabled?: WithDefault<boolean, true>;
@@ -81,6 +85,7 @@ interface NativeProps extends ViewProps {
   onScroll?: DirectEventHandler<ScrollEvent>;
   onZoom?: DirectEventHandler<ZoomEvent>;
   onToolPickerLayout?: DirectEventHandler<ToolPickerLayoutEvent>;
+  onDrawingChanged?: DirectEventHandler<DrawingChangedEvent>;
   onCommandResponse?: DirectEventHandler<PKCommandResponse>;
 }
 

@@ -34,6 +34,10 @@ interface ToolPickerLayoutEvent {
   } | null;
 }
 
+interface DrawingChangedEvent {
+  base64Data: string;
+}
+
 export interface PencilkitCanvasProps {
   drawingPolicy: 'default' | 'anyInput' | 'pencilOnly';
   minimumZoomScale?: number;
@@ -43,6 +47,7 @@ export interface PencilkitCanvasProps {
   onScroll?: (event: ScrollEvent) => void;
   onZoom?: (event: ScrollEvent) => void;
   onToolPickerLayout?: (event: ToolPickerLayoutEvent) => void;
+  onDrawingChanged?: (event: DrawingChangedEvent) => void;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -264,6 +269,9 @@ export const PencilkitCanvas = forwardRef<
             frame: isInvalidFrame ? null : nativeFrame
           });
         } : undefined
+      }
+      onDrawingChanged={
+        props.onDrawingChanged ? (e) => props.onDrawingChanged!(e.nativeEvent) : undefined
       }
       onCommandResponse={handleCommandResponse}
     />

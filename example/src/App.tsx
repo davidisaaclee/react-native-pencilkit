@@ -12,6 +12,7 @@ import { PencilkitCanvas } from 'react-native-pencilkit';
 
 export default function App() {
   const ref = useRef<ComponentRef<typeof PencilkitCanvas>>(null);
+  const mirrorRef = useRef<ComponentRef<typeof PencilkitCanvas>>(null);
   const [exportedImage, setExportedImage] = useState<string | null>(null);
   const [savedDrawingData, setSavedDrawingData] = useState<string | null>(null);
   const [drawingEnabled, setDrawingEnabled] = useState(true);
@@ -22,6 +23,7 @@ export default function App() {
     width: number;
     height: number;
   } | null>(null);
+  const [mirrorDrawingData, setMirrorDrawingData] = useState<string | null>(null);
 
   const canvasSize = useRef<[number, number] | null>(null);
 
@@ -61,6 +63,8 @@ export default function App() {
                 'Drawing changed, base64 length:',
                 e.base64Data.length
               );
+              setMirrorDrawingData(e.base64Data);
+              mirrorRef.current?.loadDrawingData(e.base64Data);
             }}
             drawingPolicy="anyInput"
             minimumZoomScale={0.5}
@@ -68,6 +72,31 @@ export default function App() {
             contentSize={[500, 500]}
           />
         </View>
+
+        <View
+          style={{
+            flex: 1,
+            margin: 20,
+            marginTop: 10,
+            borderWidth: 2,
+            borderColor: 'blue',
+          }}
+          onLayout={(event) => {
+            const { width, height } = event.nativeEvent.layout;
+            console.log('Mirror canvas measured:', width, height);
+          }}
+        >
+          <PencilkitCanvas
+            ref={mirrorRef}
+            drawingEnabled={false}
+            style={{ flex: 1 }}
+            drawingPolicy="anyInput"
+            minimumZoomScale={0.5}
+            maximumZoomScale={5}
+            contentSize={[500, 500]}
+          />
+        </View>
+
         <ScrollView
           style={{
             backgroundColor: 'hsla(0, 0%, 0%, 0.8)',

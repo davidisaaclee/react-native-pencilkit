@@ -123,13 +123,21 @@ export default function App() {
             }}
           />
           <Button
-            title="Test PencilKit.addTwo(5)"
+            title="Print drawing bounds"
             onPress={async () => {
               try {
-                const result = await PencilKit.addTwo(5);
-                console.log('PencilKit.addTwo(5) =', result);
+                console.log(
+                  'Requesting drawing data for bounds...',
+                  ref.current
+                );
+                if (!ref.current) return;
+                const data = await ref.current.requestDrawingData();
+                const handle = PencilKit.pkDrawingFromData(data);
+                const bounds = PencilKit.pkDrawingBounds(handle);
+                PencilKit.pkDrawingRelease(handle);
+                console.log('Drawing bounds:', bounds);
               } catch (error) {
-                console.error('PencilKit.addTwo failed:', error);
+                console.error('Failed to get drawing bounds:', error);
               }
             }}
           />

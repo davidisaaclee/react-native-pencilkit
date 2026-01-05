@@ -99,6 +99,7 @@ export const PencilkitCanvas = forwardRef<
   const pendingCommands = useRef<Map<number, PendingCommand>>(new Map());
 
   useImperativeHandle(forwardedRef, () => ({
+    ...nativeRef.current,
     clear: () => {
       Commands.clear(nativeRef.current!);
     },
